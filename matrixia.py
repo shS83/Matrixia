@@ -22,7 +22,7 @@ ORANGE = (255, 115, 0)
 YELLOW = (255, 255, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
-ALL_COLORS = [WHITE, BLACK, GREEN, ORANGE, YELLOW, RED, MIDNIGHT_BLUE]
+ALL_COLORS = [WHITE, BLUE, BLACK, GREEN, ORANGE, YELLOW, RED, MIDNIGHT_BLUE]
 RANDOMEVENT = pygame.USEREVENT + 5
 
 class Fadeout:
@@ -58,8 +58,13 @@ class Descender:
         font_size = font.size("gZ")
         counter = 1
 
-        if self.y < yRES:
-            text = font.render(char, True, (0, 255, 0))
+        if self.y < yRES + self.y_space:
+            if PARTYMODE:
+                text = font.render(char, True, random.choice(ALL_COLORS))
+            elif GRAYSCALE:
+                text = font.render(char, True, WHITE)
+            else:
+                text = font.render(char, True, GREEN)
             pos = (self.x, self.y)
             text.set_alpha(255)
             screen.blit(text, pos)
@@ -96,12 +101,12 @@ LETTERS: int = 100000
 katakana: str = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヰヱヲン"
 all_letters: list = []
 fs: tuple = font.size('gZ')
+PARTYMODE = False
+GRAYSCALE = False
 
 def scaler(size):
     font_scaled: list = []
     factor: float = (screen.get_size()[0] / fs[0]) + (screen.get_size()[1] / fs[1]) // 2 * 0.01
-    print(f"font-size: {fs}")
-    print(f"factor: {factor}")
     font_scaled.append([fs[0], fs[1]])
     font_scaled[0][0] %= int(round(factor))
     font_scaled[0][1] %= int(round(factor))
@@ -109,18 +114,19 @@ def scaler(size):
     return size
 
 fs = scaler(fs)
-print(f"font-size: {fs}")
 a: object = Descender(fs[0])
 all_letters.append(a)
-toast: pygame.Surface = pygame.Surface((300, 150))
-pygame.draw.rect(toast, WHITE, ((0, 0), (300, 150)))
-pygame.draw.rect(toast, MIDNIGHT_BLUE, ((5, 5), (290, 140)))
+toast: pygame.Surface = pygame.Surface((400, 200))
+pygame.draw.rect(toast, WHITE, ((0, 0), (400, 200)))
+pygame.draw.rect(toast, MIDNIGHT_BLUE, ((5, 5), (390, 190)))
 smaller_font = pygame.font.SysFont('vl gothic', 16)
 toast.blit(font.render("Instructions:", True, ORANGE), (15, 15))
 toast.blit(smaller_font.render("KEYPAD + = increase font size", True, YELLOW), (15, 60))
 toast.blit(smaller_font.render("KEYPAD - = decrease font size", True, YELLOW), (15, 80))
-toast.blit(smaller_font.render("ESCAPE = Quit", True, YELLOW), (15, 100))
-toast.blit(smaller_font.render("P = Party mode", True, WHITE), (15, 120))
+
+toast.blit(smaller_font.render("P = Party mode", True, GREEN), (15, 120))
+toast.blit(smaller_font.render("G = Grayscale", True, WHITE), (15, 140))
+toast.blit(smaller_font.render("ESCAPE = Quit", True, RED), (15, 160))
 fader = Fadeout(toast, 50)
 
 while running:
@@ -135,6 +141,17 @@ while running:
             if event.key == pygame.K_KP_MINUS and FONT_SIZE > 0:
                 FONT_SIZE -= 1
                 font = pygame.font.SysFont('vl gothic', FONT_SIZE)
+            if event.key == pygame.K_p:
+                if PARTYMODE:
+                    PARTYMODE = False
+                else:
+                    PARTYMODE = True
+            if event.key == pygame.K_g:
+                if GRAYSCALE:
+                    GRAYSCALE = False
+                else:
+                    GRAYSCALE = True
+
         if event.type == pygame.QUIT:
             running = False
 
