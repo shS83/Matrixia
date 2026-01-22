@@ -161,7 +161,8 @@ toast.blit(smaller_font.render("g = Grayscale", True, WHITE), (15, 140))
 toast.blit(smaller_font.render("c = Cycle through colors", True, PURPLE), (15, 160))
 toast.blit(smaller_font.render("d = Double random colors", True, ORANGE), (15, 180))
 toast.blit(smaller_font.render("f = fullscreen", True, MAGENTA), (15, 200))
-toast.blit(smaller_font.render("ESCAPE = Quit", True, RED), (15, 220))
+toast.blit(smaller_font.render("i = this info toastie", True, WHITE), (15, 220))
+toast.blit(smaller_font.render("ESCAPE = Quit", True, RED), (15, 250))
 fader = Fadeout(toast, 50)
 temp_color = ALL_COLORS.copy()
 random_color = None
@@ -219,6 +220,10 @@ while running:
                 else:
                     STATUS = State.FULLSCREEN
                     pygame.display.set_mode(pygame.display.get_surface().get_size(), pygame.FULLSCREEN, 32)
+            elif event.key == pygame.K_i:
+                toast.set_alpha(255)
+                fader = Fadeout(toast, 100)
+
         if event.type == pygame.QUIT:
             running = False
 
