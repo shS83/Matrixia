@@ -1,19 +1,30 @@
 import pygame
-import pygame.gfxdraw
+from pygame.locals import *
 import random
 from enum import Enum
 
-NOW_MS = 0
-timer = pygame.time.Clock()
+class State(Enum):
+    NONE = 0
+    PARTYMODE = 1
+    GRAYSCALE = 2
+    CYCLIST = 3
+    RANDO = 4
+    DOUBLETROUBLE = 5
+    FULLSCREEN = 6
+    REVERSE = 7
+
+
 pygame.init()
+timer = pygame.time.Clock()
 info_object = pygame.display.Info()
 xRES, yRES = info_object.current_w, info_object.current_h
-screen = pygame.display.set_mode([xRES, yRES], pygame.RESIZABLE)
+screen = pygame.display.set_mode([xRES, yRES], RESIZABLE)
 startTime = pygame.time.get_ticks()
-FONT_SIZE = 21
-font = pygame.font.Font('VL-Gothic-Regular.ttf', FONT_SIZE)
+font_size = 21
+font = pygame.font.Font('VL-Gothic-Regular.ttf', font_size)
 pygame.display.set_icon(font.render("シ", True, (0, 255, 0)))
 running = True
+
 MIDNIGHT_BLUE = (20, 20, 50)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -25,18 +36,22 @@ BLUE = (0, 0, 255)
 MAGENTA = (255, 0, 255)
 PURPLE = (128, 0, 128)
 CYAN = (0, 255, 255)
-
 ALL_COLORS = [WHITE, BLUE, BLACK, GREEN, ORANGE, YELLOW, RED, MIDNIGHT_BLUE, MAGENTA, PURPLE, CYAN]
 current_cycle = None
 color = None
-RANDOMEVENT = pygame.USEREVENT + 5
+RANDOMEVENT = USEREVENT + 5
+STATUS = State.NONE
+LETTERS: int = 100000
+katakana: str = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヰヱヲン"
+all_letters: list = []
+fs: tuple = font.size('gZ')
 
 class Fadeout:
+    global STATUS
+
     def __init__(self, obj: pygame.Surface, delay: float):
-        # self.display = display
         self.object = obj
         self.delay = delay
-        # self.position = position
         self.alpha = 255
 
     def fade_out(self) -> pygame.Surface:
@@ -46,12 +61,9 @@ class Fadeout:
         self.delay -= 1
         return self.object.copy()
 
-    # def update(self):
-    #    self.display.blit(self.object, self.position)
-
 class Descender:
     """ Descent unto madness """
-    global WHITE, BLACK, GREEN, ORANGE, YELLOW, RED, BLUE, MAGENTA, PURPLE, CYAN, MIDNIGHT_BLUE, ALL_COLORS, current_cycle, PARTYMODE, GRAYSCALE, xRES, yRES, screen
+    global WHITE, BLACK, GREEN, ORANGE, YELLOW, RED, BLUE, MAGENTA, PURPLE, CYAN, MIDNIGHT_BLUE, ALL_COLORS, current_cycle, xRES, yRES, screen
     def __init__(self, x):
         self.y = -20
         self.x = x
@@ -59,11 +71,11 @@ class Descender:
         self.trail = 35
         self.olds = []
         self.currframe = 1
-        self.y_space = 80
+        self.y_space = self.trail + 80
 
-    def descend(self, char):
+    def descend(self, char: str) -> bool | None:
         global color, xRES, fs, all_letters
-        font_size = font.size("gZ")
+        fontsize = font.size("gZ")
         counter = 1
 
         if self.y < yRES + self.y_space:
@@ -110,7 +122,7 @@ class Descender:
             screen.blit(t, p)
             counter += 1
 
-        self.y += font_size[1]
+        self.y += fontsize[1]
 
         if self.y > yRES:
             if len(self.olds) > 0:
@@ -121,31 +133,16 @@ class Descender:
         
         return True
 
-class State(Enum):
-    NONE = 0
-    PARTYMODE = 1
-    GRAYSCALE = 2
-    CYCLIST = 3
-    RANDO = 4
-    DOUBLETROUBLE = 5
-    FULLSCREEN = 6
+# def scaler(size):
+#     font_scaled: list = []
+#     factor: float = (screen.get_size()[0] / size[0]) / 2 * 0.01
+#     font_scaled.append([size[0], size[1]])
+#     font_scaled[0][0] *= int(round(factor))
+#     font_scaled[0][1] *= int(round(factor))
+#     size = tuple(font_scaled[0])
+#     return size
 
-STATUS = State.NONE
-LETTERS: int = 100000
-katakana: str = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヰヱヲン"
-all_letters: list = []
-fs: tuple = font.size('gZ')
-
-def scaler(size):
-    font_scaled: list = []
-    factor: float = (screen.get_size()[0] / fs[0]) + (screen.get_size()[1] / fs[1]) // 2 * 0.01
-    font_scaled.append([fs[0], fs[1]])
-    font_scaled[0][0] %= int(round(factor))
-    font_scaled[0][1] %= int(round(factor))
-    size = tuple(font_scaled[0])
-    return size
-
-fs = scaler(fs)
+# fs = scaler(fs)
 a: object = Descender(fs[0])
 all_letters.append(a)
 toast: pygame.Surface = pygame.Surface((500, 300))
@@ -185,46 +182,50 @@ def rando():
 while running:
 
     for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
                 running = False
-            elif event.key == pygame.K_KP_PLUS or event.key == pygame.K_PLUS:
-                FONT_SIZE += 1
-                font = pygame.font.Font('VL-Gothic-Regular.ttf', FONT_SIZE)
-            elif event.key == pygame.K_KP_MINUS or event.key == pygame.K_MINUS and FONT_SIZE > 0:
-                FONT_SIZE -= 1
-                font = pygame.font.Font('VL-Gothic-Regular.ttf', FONT_SIZE)
-            elif event.key == pygame.K_p:
+            elif event.key == K_KP_PLUS or event.key == K_PLUS:
+                font_size += 1
+                font = font.Font('VL-Gothic-Regular.ttf', font_size)
+            elif event.key == K_KP_MINUS or event.key == K_MINUS and font_size > 0:
+                font_size -= 1
+                font = font.Font('VL-Gothic-Regular.ttf', font_size)
+            elif event.key == K_p:
                 if not STATUS.NONE:
                     STATUS = State.NONE
                 else:
                     STATUS = State.PARTYMODE
-            elif event.key == pygame.K_g:
+            elif event.key == K_g:
                 if not STATUS.NONE:
                     STATUS = State.NONE
                 else:
                     STATUS = State.GRAYSCALE
-            elif event.key == pygame.K_c:
+            elif event.key == K_c:
                 STATUS = State.CYCLIST
                 color = cyclist()
-            elif event.key == pygame.K_r:
+            elif event.key == K_r:
                 STATUS = State.RANDO
                 random_color = rando()
-            elif event.key == pygame.K_d:
+            elif event.key == K_d:
                 STATUS = State.DOUBLETROUBLE
                 random_color = rando()
-            elif event.key == pygame.K_f:
+            elif event.key == K_f:
                 if STATUS == State.FULLSCREEN:
                     STATUS = State.NONE
-                    pygame.display.set_mode((1024, 768), pygame.RESIZABLE, 32)
+                    pygame.display.set_mode((1024, 768), RESIZABLE, 32)
                 else:
                     STATUS = State.FULLSCREEN
-                    pygame.display.set_mode(pygame.display.get_surface().get_size(), pygame.FULLSCREEN, 32)
-            elif event.key == pygame.K_i:
+                    pygame.display.set_mode(pygame.display.get_surface().get_size(), FULLSCREEN, 32)
+            elif event.key == K_i:
                 toast.set_alpha(255)
                 fader = Fadeout(toast, 100)
-
-        if event.type == pygame.QUIT:
+            elif event.key == K_BACKSPACE:
+                if STATUS == State.REVERSE:
+                    STATUS = State.NONE
+                else:
+                    STATUS = State.REVERSE
+        if event.type == QUIT:
             running = False
 
     screen.fill((0, 0, 0))
@@ -232,15 +233,14 @@ while running:
 
     if len(all_letters) < LETTERS:
         xRES, yRES = screen.get_size()
+        fs = font.size("gZ")
         if STATUS == State.DOUBLETROUBLE:
             for _ in range(2):
-                fs = scaler(fs)
                 blocks = int(xRES / fs[0])
                 rand_x = fs[0] * random.randint(0, blocks)
                 b = Descender(rand_x)
                 all_letters.append(b)
         else:
-            fs = scaler(fs)
             blocks = int(xRES / fs[0])
             rand_x = fs[0] * random.randint(0, blocks)
             b = Descender(rand_x)
@@ -261,3 +261,5 @@ while running:
 
     pygame.display.flip()
     timer.tick(159)
+
+pygame.quit()
