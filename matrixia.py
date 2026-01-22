@@ -132,16 +132,7 @@ class Descender:
         
         return True
 
-# def scaler(size):
-#     font_scaled: list = []
-#     factor: float = (screen.get_size()[0] / size[0]) / 2 * 0.01
-#     font_scaled.append([size[0], size[1]])
-#     font_scaled[0][0] *= int(round(factor))
-#     font_scaled[0][1] *= int(round(factor))
-#     size = tuple(font_scaled[0])
-#     return size
 
-# fs = scaler(fs)
 a: object = Descender(fs[0])
 all_letters.append(a)
 toast: pygame.Surface = pygame.Surface((500, 300))
