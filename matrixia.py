@@ -4,6 +4,7 @@ import random
 from enum import Enum
 
 class State(Enum):
+    """ The name of the game """
     NONE = 0
     PARTYMODE = 1
     GRAYSCALE = 2
@@ -37,15 +38,17 @@ MAGENTA = (255, 0, 255)
 PURPLE = (128, 0, 128)
 CYAN = (0, 255, 255)
 ALL_COLORS = [WHITE, BLUE, BLACK, GREEN, ORANGE, YELLOW, RED, MIDNIGHT_BLUE, MAGENTA, PURPLE, CYAN]
+
 current_cycle = None
 color = None
 STATUS = State.NONE
-LETTERS: int = 100000
+letters: int = 100000
 katakana: str = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヰヱヲン"
 all_letters: list = []
 fs: tuple = font.size('gZ')
 
 class Fadeout:
+    """ Fadeout unto darkness """
     global STATUS
 
     def __init__(self, obj: pygame.Surface, delay: float):
@@ -221,7 +224,7 @@ while running:
     screen.fill((0, 0, 0))
     pygame.display.set_caption(f"{str(len(all_letters))}x of something is still nonething")
 
-    if len(all_letters) < LETTERS:
+    if len(all_letters) < letters:
         xRES, yRES = screen.get_size()
         fs = font.size("gZ")
         if STATUS == State.DOUBLETROUBLE:
