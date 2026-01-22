@@ -39,7 +39,6 @@ CYAN = (0, 255, 255)
 ALL_COLORS = [WHITE, BLUE, BLACK, GREEN, ORANGE, YELLOW, RED, MIDNIGHT_BLUE, MAGENTA, PURPLE, CYAN]
 current_cycle = None
 color = None
-RANDOMEVENT = USEREVENT + 5
 STATUS = State.NONE
 LETTERS: int = 100000
 katakana: str = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヰヱヲン"
