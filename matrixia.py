@@ -1,8 +1,7 @@
 import pygame
 import pygame.gfxdraw
 import random
-import math
-import string
+from enum import Enum
 
 NOW_MS = 0
 timer = pygame.time.Clock()
@@ -12,7 +11,8 @@ xRES, yRES = info_object.current_w, info_object.current_h
 screen = pygame.display.set_mode([xRES, yRES], pygame.RESIZABLE)
 startTime = pygame.time.get_ticks()
 FONT_SIZE = 21
-font = pygame.font.SysFont('vl gothic', FONT_SIZE)
+font = pygame.font.Font('VL-Gothic-Regular.ttf', FONT_SIZE)
+pygame.display.set_icon(font.render("シ", True, (0, 255, 0)))
 running = True
 MIDNIGHT_BLUE = (20, 20, 50)
 WHITE = (255, 255, 255)
@@ -27,6 +27,8 @@ PURPLE = (128, 0, 128)
 CYAN = (0, 255, 255)
 
 ALL_COLORS = [WHITE, BLUE, BLACK, GREEN, ORANGE, YELLOW, RED, MIDNIGHT_BLUE, MAGENTA, PURPLE, CYAN]
+current_cycle = None
+color = None
 RANDOMEVENT = pygame.USEREVENT + 5
 
 class Fadeout:
@@ -48,7 +50,8 @@ class Fadeout:
     #    self.display.blit(self.object, self.position)
 
 class Descender:
-
+    """ Descent unto madness """
+    global WHITE, BLACK, GREEN, ORANGE, YELLOW, RED, BLUE, MAGENTA, PURPLE, CYAN, MIDNIGHT_BLUE, ALL_COLORS, current_cycle, PARTYMODE, GRAYSCALE, xRES, yRES, screen
     def __init__(self, x):
         self.y = -20
         self.x = x
@@ -59,16 +62,34 @@ class Descender:
         self.y_space = 80
 
     def descend(self, char):
+        global color, xRES, fs, all_letters
         font_size = font.size("gZ")
         counter = 1
 
         if self.y < yRES + self.y_space:
-            if PARTYMODE:
-                text = font.render(char, True, random.choice(ALL_COLORS))
-            elif GRAYSCALE:
-                text = font.render(char, True, WHITE)
-            else:
-                text = font.render(char, True, GREEN)
+            text = font.render(char, True, GREEN)
+            match STATUS:
+                case State.PARTYMODE:
+                    # Partymode
+                    text = font.render(char, True, random.choice(ALL_COLORS))
+                case State.GRAYSCALE:
+                    # Grayscale
+                    text = font.render(char, True, WHITE)
+                case State.CYCLIST:
+                    # Cycled color
+                    text = font.render(char, True, color)
+                case State.RANDO:
+                    # Random color
+                    text = font.render(char, True, random_color)
+                case State.DOUBLETROUBLE:
+                    # Double random colors
+                    text = font.render(char, True, rando(), rando())
+                case State.NONE:
+                    # Default green color
+                    text = font.render(char, True, GREEN)
+                case _:
+                    # Obsolete
+                    ...
             pos = (self.x, self.y)
             text.set_alpha(255)
             screen.blit(text, pos)
@@ -100,13 +121,20 @@ class Descender:
         
         return True
 
+class State(Enum):
+    NONE = 0
+    PARTYMODE = 1
+    GRAYSCALE = 2
+    CYCLIST = 3
+    RANDO = 4
+    DOUBLETROUBLE = 5
+    FULLSCREEN = 6
 
+STATUS = State.NONE
 LETTERS: int = 100000
 katakana: str = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヰヱヲン"
 all_letters: list = []
 fs: tuple = font.size('gZ')
-PARTYMODE = False
-GRAYSCALE = False
 
 def scaler(size):
     font_scaled: list = []
@@ -120,18 +148,38 @@ def scaler(size):
 fs = scaler(fs)
 a: object = Descender(fs[0])
 all_letters.append(a)
-toast: pygame.Surface = pygame.Surface((400, 200))
-pygame.draw.rect(toast, WHITE, ((0, 0), (400, 200)))
-pygame.draw.rect(toast, MIDNIGHT_BLUE, ((5, 5), (390, 190)))
-smaller_font = pygame.font.SysFont('vl gothic', 16)
+toast: pygame.Surface = pygame.Surface((500, 300))
+pygame.draw.rect(toast, WHITE, ((0, 0), (500, 300)))
+pygame.draw.rect(toast, MIDNIGHT_BLUE, ((5, 5), (490, 290)))
+smaller_font = pygame.font.Font('VL-Gothic-Regular.ttf', 16)
 toast.blit(font.render("Instructions:", True, ORANGE), (15, 15))
-toast.blit(smaller_font.render("KEYPAD + = increase font size", True, YELLOW), (15, 60))
-toast.blit(smaller_font.render("KEYPAD - = decrease font size", True, YELLOW), (15, 80))
-
-toast.blit(smaller_font.render("P = Party mode", True, GREEN), (15, 120))
-toast.blit(smaller_font.render("G = Grayscale", True, WHITE), (15, 140))
-toast.blit(smaller_font.render("ESCAPE = Quit", True, RED), (15, 160))
+toast.blit(smaller_font.render("+ = increase font size", True, YELLOW), (15, 60))
+toast.blit(smaller_font.render("- = decrease font size", True, YELLOW), (15, 80))
+toast.blit(smaller_font.render("r = Random color", True, CYAN), (15, 100))
+toast.blit(smaller_font.render("p = Party mode", True, GREEN), (15, 120))
+toast.blit(smaller_font.render("g = Grayscale", True, WHITE), (15, 140))
+toast.blit(smaller_font.render("c = Cycle through colors", True, PURPLE), (15, 160))
+toast.blit(smaller_font.render("d = Double random colors", True, ORANGE), (15, 180))
+toast.blit(smaller_font.render("f = fullscreen", True, MAGENTA), (15, 200))
+toast.blit(smaller_font.render("ESCAPE = Quit", True, RED), (15, 220))
 fader = Fadeout(toast, 50)
+temp_color = ALL_COLORS.copy()
+random_color = None
+
+
+def cyclist():
+    global current_cycle, ALL_COLORS, temp_color
+    try:
+        colour = temp_color.pop(0)
+    except IndexError:
+        temp_color = ALL_COLORS.copy()
+        colour = temp_color.pop(0)
+    return colour
+
+def rando():
+    global random_color
+    random_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+    return random_color
 
 while running:
 
@@ -139,40 +187,59 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
-            if event.key == pygame.K_KP_PLUS:
+            elif event.key == pygame.K_KP_PLUS or event.key == pygame.K_PLUS:
                 FONT_SIZE += 1
-                font = pygame.font.SysFont('vl gothic', FONT_SIZE)
-            if event.key == pygame.K_KP_MINUS and FONT_SIZE > 0:
+                font = pygame.font.Font('VL-Gothic-Regular.ttf', FONT_SIZE)
+            elif event.key == pygame.K_KP_MINUS or event.key == pygame.K_MINUS and FONT_SIZE > 0:
                 FONT_SIZE -= 1
-                font = pygame.font.SysFont('vl gothic', FONT_SIZE)
-            if event.key == pygame.K_p:
-                if PARTYMODE:
-                    PARTYMODE = False
+                font = pygame.font.Font('VL-Gothic-Regular.ttf', FONT_SIZE)
+            elif event.key == pygame.K_p:
+                if not STATUS.NONE:
+                    STATUS = State.NONE
                 else:
-                    PARTYMODE = True
-            if event.key == pygame.K_g:
-                if GRAYSCALE:
-                    GRAYSCALE = False
+                    STATUS = State.PARTYMODE
+            elif event.key == pygame.K_g:
+                if not STATUS.NONE:
+                    STATUS = State.NONE
                 else:
-                    GRAYSCALE = True
-
+                    STATUS = State.GRAYSCALE
+            elif event.key == pygame.K_c:
+                STATUS = State.CYCLIST
+                color = cyclist()
+            elif event.key == pygame.K_r:
+                STATUS = State.RANDO
+                random_color = rando()
+            elif event.key == pygame.K_d:
+                STATUS = State.DOUBLETROUBLE
+                random_color = rando()
+            elif event.key == pygame.K_f:
+                if STATUS == State.FULLSCREEN:
+                    STATUS = State.NONE
+                    pygame.display.set_mode((1024, 768), pygame.RESIZABLE, 32)
+                else:
+                    STATUS = State.FULLSCREEN
+                    pygame.display.set_mode(pygame.display.get_surface().get_size(), pygame.FULLSCREEN, 32)
         if event.type == pygame.QUIT:
             running = False
 
     screen.fill((0, 0, 0))
-    
+    pygame.display.set_caption(f"{str(len(all_letters))}x of something is still nonething")
+
     if len(all_letters) < LETTERS:
         xRES, yRES = screen.get_size()
-        fs = scaler(fs)
-        blocks = int(xRES / fs[0])
-        rand_x = fs[0] * random.randint(0, blocks)
-        b = Descender(rand_x)
-        all_letters.append(b)
-
-        # Let's do two at the time
-        # rand_x = fs[0] * random.randint(0, blocks)
-        # b = Descender(rand_x)
-        # all_letters.append(b)
+        if STATUS == State.DOUBLETROUBLE:
+            for _ in range(2):
+                fs = scaler(fs)
+                blocks = int(xRES / fs[0])
+                rand_x = fs[0] * random.randint(0, blocks)
+                b = Descender(rand_x)
+                all_letters.append(b)
+        else:
+            fs = scaler(fs)
+            blocks = int(xRES / fs[0])
+            rand_x = fs[0] * random.randint(0, blocks)
+            b = Descender(rand_x)
+            all_letters.append(b)
 
     for letter in all_letters:
         a = chr(random.randrange(60, 97 + 26))
@@ -184,7 +251,6 @@ while running:
 
     toast = fader.fade_out()
     screen.blit(toast, (10, 10))
-
 
     pygame.time.wait(25)
 
