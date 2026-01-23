@@ -180,10 +180,10 @@ while running:
                 running = False
             elif event.key == K_KP_PLUS or event.key == K_PLUS:
                 font_size += 1
-                font = font.Font('VL-Gothic-Regular.ttf', font_size)
+                font = pygame.font.Font('VL-Gothic-Regular.ttf', font_size)
             elif event.key == K_KP_MINUS or event.key == K_MINUS and font_size > 0:
                 font_size -= 1
-                font = font.Font('VL-Gothic-Regular.ttf', font_size)
+                font = pygame.font.Font('VL-Gothic-Regular.ttf', font_size)
             elif event.key == K_p:
                 if not STATUS.NONE:
                     STATUS = State.NONE
