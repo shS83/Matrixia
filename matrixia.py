@@ -18,8 +18,8 @@ class State(Enum):
 pygame.init()
 timer = pygame.time.Clock()
 info_object = pygame.display.Info()
-xRES, yRES = info_object.current_w, info_object.current_h
-screen = pygame.display.set_mode([xRES, yRES], RESIZABLE)
+x_res, y_res = info_object.current_w, info_object.current_h
+screen = pygame.display.set_mode([x_res, y_res], RESIZABLE)
 startTime = pygame.time.get_ticks()
 font_size = 21
 font = pygame.font.Font('VL-Gothic-Regular.ttf', font_size)
@@ -42,7 +42,7 @@ ALL_COLORS = [WHITE, BLUE, BLACK, GREEN, ORANGE, YELLOW, RED, MIDNIGHT_BLUE, MAG
 current_cycle = None
 color = None
 STATUS = State.NONE
-letters: int = 100000
+letters: int = 100000 # a bit optimistic
 katakana: str = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヰヱヲン"
 all_letters: list = []
 fs: tuple = font.size('gZ')
@@ -65,7 +65,7 @@ class Fadeout:
 
 class Descender:
     """ Descent unto madness """
-    global WHITE, BLACK, GREEN, ORANGE, YELLOW, RED, BLUE, MAGENTA, PURPLE, CYAN, MIDNIGHT_BLUE, ALL_COLORS, current_cycle, xRES, yRES, screen
+    global WHITE, BLACK, GREEN, ORANGE, YELLOW, RED, BLUE, MAGENTA, PURPLE, CYAN, MIDNIGHT_BLUE, ALL_COLORS, current_cycle, x_res, y_res, screen
     def __init__(self, x):
         self.y = -20
         self.x = x
@@ -76,11 +76,11 @@ class Descender:
         self.y_space = self.trail + 80
 
     def descend(self, char: str) -> bool | None:
-        global color, xRES, fs, all_letters
+        global color, x_res, fs, all_letters, font
         fontsize = font.size("gZ")
         counter = 1
 
-        if self.y < yRES + self.y_space:
+        if self.y < y_res + self.y_space:
             text = font.render(char, True, GREEN)
             match STATUS:
                 case State.PARTYMODE:
@@ -126,7 +126,7 @@ class Descender:
 
         self.y += fontsize[1]
 
-        if self.y > yRES:
+        if self.y > y_res:
             if len(self.olds) > 0:
                 self.olds.pop(0)
                 return True
@@ -225,16 +225,16 @@ while running:
     pygame.display.set_caption(f"{str(len(all_letters))}x of something is still nonething")
 
     if len(all_letters) < letters:
-        xRES, yRES = screen.get_size()
+        x_res, y_res = screen.get_size()
         fs = font.size("gZ")
         if STATUS == State.DOUBLETROUBLE:
             for _ in range(2):
-                blocks = int(xRES / fs[0])
+                blocks = int(x_res / fs[0])
                 rand_x = fs[0] * random.randint(0, blocks)
                 b = Descender(rand_x)
                 all_letters.append(b)
         else:
-            blocks = int(xRES / fs[0])
+            blocks = int(x_res / fs[0])
             rand_x = fs[0] * random.randint(0, blocks)
             b = Descender(rand_x)
             all_letters.append(b)
@@ -253,6 +253,6 @@ while running:
     pygame.time.wait(25)
 
     pygame.display.flip()
-    timer.tick(159)
+    timer.tick(159) # a very optimistic evaluation of my optimization skills.
 
 pygame.quit()
