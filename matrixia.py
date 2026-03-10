@@ -38,6 +38,7 @@ MAGENTA = (255, 0, 255)
 PURPLE = (128, 0, 128)
 CYAN = (0, 255, 255)
 ALL_COLORS = [WHITE, BLUE, BLACK, GREEN, ORANGE, YELLOW, RED, MIDNIGHT_BLUE, MAGENTA, PURPLE, CYAN]
+speed = 25
 
 current_cycle = None
 color = None
@@ -145,6 +146,8 @@ smaller_font = pygame.font.Font('VL-Gothic-Regular.ttf', 16)
 toast.blit(font.render("Instructions:", True, ORANGE), (15, 15))
 toast.blit(smaller_font.render("+ = increase font size", True, YELLOW), (15, 60))
 toast.blit(smaller_font.render("- = decrease font size", True, YELLOW), (15, 80))
+toast.blit(smaller_font.render(", = decrease animation speed", True, GREEN), (210, 60))
+toast.blit(smaller_font.render(". = increase animation speed", True, GREEN), (210, 80))
 toast.blit(smaller_font.render("r = Random color", True, CYAN), (15, 100))
 toast.blit(smaller_font.render("p = Party mode", True, GREEN), (15, 120))
 toast.blit(smaller_font.render("g = Grayscale", True, WHITE), (15, 140))
@@ -184,6 +187,10 @@ while running:
             elif event.key == K_KP_MINUS or event.key == K_MINUS and font_size > 0:
                 font_size -= 1
                 font = pygame.font.Font('VL-Gothic-Regular.ttf', font_size)
+            elif event.key == K_COMMA and speed > -500:
+                speed -= 1
+            elif event.key == K_PERIOD and speed < 500:
+                speed += 1
             elif event.key == K_p:
                 if not STATUS.NONE:
                     STATUS = State.NONE
@@ -250,7 +257,7 @@ while running:
     toast = fader.fade_out()
     screen.blit(toast, (10, 10))
 
-    pygame.time.wait(25)
+    pygame.time.wait(speed)
 
     pygame.display.flip()
     timer.tick(159) # a very optimistic evaluation of my optimization skills.
