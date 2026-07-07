@@ -1,0 +1,15 @@
+{
+  "KPackageStructure": "Plasma/Wallpaper",
+  "KPlugin": {
+    "Id": "io.shs.matrixia",
+    "Name": "Matrixia",
+    "Description": "Animated Matrix-style digital rain",
+    "Version": "1.0.2",
+    "License": "GPL-3.0-or-later",
+    "Authors": [
+      {
+        "Name": "shS"
+      }
+    ]
+  }
+}
