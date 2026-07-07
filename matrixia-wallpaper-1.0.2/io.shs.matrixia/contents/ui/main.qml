@@ -40,11 +40,6 @@ WallpaperItem {
 
 	Settings {
 		id: configFile
-
-		// StandardPaths.writableLocation() already returns a URL.
-		// Adding another "file://" prefix would produce an invalid URL
-		// such as file://file:///home/... and make every read fall back
-		// to the defaults above.
 		location: StandardPaths.writableLocation(
 			StandardPaths.ConfigLocation
 		) + "/matrixia.conf"
@@ -75,8 +70,6 @@ WallpaperItem {
 	}
 
 	function configuredMode() {
-		// Boolean compatibility keys are checked first so the originally
-		// suggested partymode=on/off syntax also works.
 		if (boolValue(configFile.value("partymode", "off"), false)) {
 			return "party"
 		}
