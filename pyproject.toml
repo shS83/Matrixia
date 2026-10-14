@@ -5,6 +5,8 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "numpy>=2.5.0",
     "pygame>=2.6.1",
-    "pyinstaller>=6.20.0",
+    "pygame-ce>=2.5.7",
+    "pyopengl>=3.1.10",
 ]
