@@ -19,7 +19,7 @@ pygame.init()
 timer = pygame.time.Clock()
 info_object = pygame.display.Info()
 x_res, y_res = info_object.current_w, info_object.current_h
-screen = pygame.display.set_mode([x_res, y_res], RESIZABLE)
+screen = pygame.display.set_mode([x_res, y_res], FULLSCREEN)
 startTime = pygame.time.get_ticks()
 font_size = 21
 font = pygame.font.Font('VL-Gothic-Regular.ttf', font_size)
